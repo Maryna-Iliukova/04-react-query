@@ -39,7 +39,10 @@ export default function App() {
 
   return (
     <>
-      <SearchBar onSubmit={handleSearch} />
+      <SearchBar action={(formData) => {
+      const query = formData.get("query") as string;
+      handleSearch(query);
+      }} />
       <Toaster position="top-right" />
 
       {isLoading && <Loader />}
