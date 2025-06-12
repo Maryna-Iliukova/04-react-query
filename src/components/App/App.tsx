@@ -5,7 +5,7 @@ import MovieGrid from "../MovieGrid/MovieGrid";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
-import { useMovies } from "../hooks/useMovies";
+import useMovies from "../hooks/useMovies";
 import ReactPaginate from "react-paginate";
 import type { Movie } from "../../types/movie";
 import css from "./App.module.css";
@@ -18,8 +18,16 @@ export default function App() {
   const { data, isLoading, isError } = useMovies(query, page);
 
   const handleSearch = (newQuery: string) => {
-    if (newQuery === query) return;
-    setQuery(newQuery);
+    const trimmedQuery = newQuery.trim();
+
+    if (!trimmedQuery) {
+      toast.error("Please enter your search query.");
+      return;
+    }
+
+    if (trimmedQuery === query) return;
+
+    setQuery(trimmedQuery);
     setPage(1);
   };
 
@@ -39,10 +47,7 @@ export default function App() {
 
   return (
     <>
-      <SearchBar action={(formData) => {
-      const query = formData.get("query") as string;
-      handleSearch(query);
-      }} />
+      <SearchBar onSubmit={handleSearch} />
       <Toaster position="top-right" />
 
       {isLoading && <Loader />}
