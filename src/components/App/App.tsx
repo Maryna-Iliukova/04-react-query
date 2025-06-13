@@ -15,8 +15,18 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useMovies(query, page);
-
+    const { data, isLoading, isError } = useMovies(query, page, {
+    enabled: query.trim().length > 0,
+    keepPreviousData: true,
+  });
+  
+useEffect(() => {
+    if (query.trim().length === 0) return; // Порожній пошук — не показуємо
+    if (!isLoading && data && data.results.length === 0) {
+      toast.error("No movies found.");
+    }
+  }, [data, isLoading, query]);
+  
   const handleSearch = (newQuery: string) => {
     const trimmedQuery = newQuery.trim();
 
@@ -50,11 +60,7 @@ export default function App() {
       <SearchBar onSubmit={handleSearch} />
       <Toaster position="top-right" />
 
-      {isLoading && <Loader />}
-      {isError && <ErrorMessage />}
-      {data && data.results.length === 0 && toast.error("No movies found.")}
-
-      {!isLoading && !isError && data && data.results.length > 0 && (
+     {!isLoading && !isError && data && data.results.length > 0 && (
         <>
           <MovieGrid movies={data.results} onSelect={handleSelect} />
           {totalPages > 1 && (
