@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
@@ -15,13 +15,10 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-    const { data, isLoading, isError } = useMovies(query, page, {
-    enabled: query.trim().length > 0,
-    keepPreviousData: true,
-  });
+    const { data, isLoading, isError } = useMovies(query, page);
   
 useEffect(() => {
-    if (query.trim().length === 0) return; // Порожній пошук — не показуємо
+    if (query.trim().length === 0) return;
     if (!isLoading && data && data.results.length === 0) {
       toast.error("No movies found.");
     }
@@ -60,7 +57,9 @@ useEffect(() => {
       <SearchBar onSubmit={handleSearch} />
       <Toaster position="top-right" />
 
-     {!isLoading && !isError && data && data.results.length > 0 && (
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
+      {!isLoading && !isError && data && data.results.length > 0 && (
         <>
           <MovieGrid movies={data.results} onSelect={handleSelect} />
           {totalPages > 1 && (
